@@ -13,11 +13,16 @@ function packerInstall {
     exit 1
   fi
 
-  echo "installing Packer"
-  unzip packer_0.7.5_linux_386.zip -d packer
+  echo "installing Packer to /usr/local/sbin"
+  unzip packer_0.7.5_linux_386.zip -d /usr/local/sbin
 }
 
 function addToPath {
+
+# because executing a shell script causes fork and the spawning of a 
+# subshell -- there is no way to source the current shell's ~/.profile
+# or ~/.bashrc  from a shell script.
+
   which packer
   if [ $? -ne 0 ]; then
     echo PATH=$PATH:~/packer >> ~/.profile
@@ -28,4 +33,4 @@ function addToPath {
 }
 
 packerInstall
-addToPath
+#addToPath
