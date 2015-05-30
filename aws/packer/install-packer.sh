@@ -1,6 +1,23 @@
-/bin/bash
+#!/bin/bash
 
-function packerInstall {
+function DarwinPackerInstall {
+  # Install on Darwin OS X
+
+  echo "Downloading Packer"
+  `curl -L https://dl.bintray.com/mitchellh/packer/packer_0.7.5_darwin_amd64.zip > packer_0.7.5_darwin.zip`
+
+  if [ -s "packer_0.7.5_darwin.zip" ]; then
+    echo "installing Packer to /usr/local/bin"
+    sudo unzip packer_0.7.5_darwin.zip -d /usr/local/bin
+  else
+    echo "packer_0.7.5_darwin.zip filesize was 0, download error"
+  fi
+
+}
+
+function UbuntuPackerInstall {
+  # Install on Ubuntu
+
   echo "Downloading Packer"
   `wget https://dl.bintray.com/mitchellh/packer/packer_0.7.5_linux_386.zip`
 
@@ -32,5 +49,13 @@ function addToPath {
   fi
 }
 
-packerInstall
+UNAME_STRING=`uname`
+echo "$UNAME_STRING here"
+if [ $UNAME_STRING == 'Darwin'  ]; then
+  DarwinPackerInstall
+elif [ $UNAME_STRING == 'Linux'  ]; then
+  UbuntuPackerInstall
+fi
+
+#packerInstall
 #addToPath
