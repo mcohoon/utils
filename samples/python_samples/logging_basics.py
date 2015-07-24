@@ -1,8 +1,10 @@
 import logging
 import sys
-# create logger
+
+# create logger named module_logger
 module_logger = logging.getLogger('spam_application.auxiliary')
 
+# module_logger.setLevel('DEBUG')
 module_logger.addHandler(logging.StreamHandler(sys.stdout))
 if module_logger.getEffectiveLevel() == logging.DEBUG:
    print "Loging level debug"
