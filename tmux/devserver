@@ -1,0 +1,97 @@
+#!/bin/bash
+
+# ----------------------
+# Check for dependencies
+# ----------------------
+
+function check_tmux() {
+	# check tmux is installed
+	if [ ! 'which tmux' ]; then
+		echo "Please install tmux:"
+	    echo "brew install tmux"
+	    exit 1
+	fi
+}
+
+function start_tmux() {
+	# ----------------------
+	# Start TMUX
+	# ----------------------
+	tmux start-server
+
+	# Kill any old session.  Don't exit on fail since kill-session is expected to fail if there is no old session.
+	set +e
+	tmux kill-session -t session-name
+	set -e
+
+	if [[ -z "$TMUX" ]]; then
+	# if not in tmux, start session and load config
+	    tmux new-session -d -s session-name -n Instructions
+	    tmux source-file DevEnv.tmux.conf
+	else
+	# else, unset $TMUX to be able to start the server, then reset it. do not load config.
+	    TMUX_TEMP=$TMUX
+	    TMUX=
+	    tmux new-session -d -s session-name -n Instructions
+	    TMUX=$TMUX_TEMP
+	    unset TMUX_TEMP
+	fi
+}
+
+function tmux_windows() {
+	echo "Starting Processes ... one moment please ..."
+
+	# ----------------------
+	# start_server_process
+	# ----------------------
+	tmux new-window -t session-name -n WindowName
+	tmux send-keys -t session-name:WindowName "cd important/path" C-m
+	tmux send-keys -t session-name:WindowName " ./start_server_process.sh" C-m
+
+	# ----------------------
+	# Srun_agent_process
+	# ----------------------
+	tmux new-window -t session-name -n SecondWindow
+	tmux send-keys -t session-name:SecondWindow "workon pyton_virtual_env" C-m
+	tmux send-keys -t session-name:SecondWindow "cd important/path" C-m
+	tmux send-keys -t session-name:SecondWindow "./run_agent_process.sh" C-m
+}
+
+function load_chrome() {
+	# ----------------------
+	# Chrome load Test-url
+	# ----------------------
+    TEST_URL="http://test-url.com/"
+
+	if [[ -n ${CHROME+1} ]]; then
+	    CHROME=$CHROME
+	elif [ /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome ]; then
+		CHROME="/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+	else
+        echo "Set the CHROME env varriable to launch Test-url"
+        echo "export CHROME=/path/here"
+        return
+	fi
+    sleep 3
+	"${CHROME}" "${TEST_URL}"
+  
+}
+
+function attach_tmux() {
+	if [[ -z "$TMUX" ]]; then
+	# if not in tmux, attach to the server.
+	    tmux attach-session -t session-name
+	else
+	# else links windows to current session.
+	    tmux link-window -s session-name:WindowName
+	    tmux link-window -s session-name:SecondWindow
+	    tmux join-pane -s WindowName -t SecondWindow
+	    tmux kill-session -t session-name
+	fi
+}
+
+check_tmux
+start_tmux
+tmux_windows
+load_chrome
+attach_tmux
