@@ -1,0 +1,40 @@
+#!/bin/bash
+
+
+#
+#   Use this script to accelerate yml development by linting the yml file as it's developed.
+#   Use with ruby_lint with watch and save often to constantly compile the yml syntax for errors.
+#   It's either this or using emacs ... 
+#
+#   Args:
+#       yml file: the relative or absolute path to the .yaml file
+#   example: 
+#       ruby_lint /Users/YOU/path/to/file.yml
+#       ruby_lint path/to/file.yml
+#
+#   Use with watch and save often:
+#       watch -n5 ruby_lint path/to/file.yml
+# 
+
+function ruby_lint() {
+
+    if [ ! `which ruby` ]; then
+        echo "Please configure ruby"
+        exit 1
+    fi
+    
+    echo " ** YAML LINTING:  ${args[0]}"
+    `ruby -e "require 'yaml'; YAML.load_file(\"${args[0]}\")"`
+    #  ruby -e "require 'yaml'; YAML.load_file('statsboard/alerts/defs/elb.yml')"
+    echo "ruby_lint of ${args[0]} exit code: $?" 
+}
+
+if [ ! `which watch` ]; then
+    echo "Using this script with "watch" will accelerate yml development:"
+    echo "brew install watch"
+    echo "watch -n 5 ruby_lint path/to/file.yml"
+fi
+
+args=("$@")
+ruby_lint
+
