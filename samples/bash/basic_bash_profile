@@ -1,0 +1,93 @@
+
+# HISTORY
+# Write a permanent history, aggregated for all terminals
+export HISTTIMEFORMAT="%Y-%m-%d %T "    # Add timestamps to .bash_history
+export HISTCONTROL=ignoredups   # ignores repeated lines
+export HISTSIZE=100000          # big big history
+export HISTFILESIZE=100000      # big big history
+shopt -s histappend             # append to history, don't overwrite it
+#export PROMPT_COMMAND="$PROMPT_COMMAND; history -a" # aggregate history over multiple terminals
+if [[ -n ${PROMPT_COMMAND+1} ]]; then
+    export PROMPT_COMMAND="$PROMPT_COMMAND; history -a" 
+else
+    export PROMPT_COMMAND="history -a" 
+fi
+
+# bash prompt setup
+export PS1='[\h]\[\e[0;32m\] \W\[\e[0;36m\]$(parse_git_branch)\[\e[0m\]$ '
+
+# autojump -- to quickly move between directories
+[[ -s $(brew --prefix)/etc/profile.d/autojump.sh ]] && . $(brew --prefix)/etc/profile.d/autojump.sh
+# j <keyword>
+
+# PDSH 
+export PDSH_SSH_ARGS_APPEND="-o StrictHostKeyChecking=no"
+# $ pdsh -f XX -R ssh -w $(XX Func XX) "uname -s" | dshbak -c
+# pdsh -f = set number of hosts to 
+
+
+
+
+# Codesearch cindex / csearch 
+alias reindex_code="cindex /Users/jzinner/utils"
+alias search_code="csearch -f /Users/jzinner/utils 'Report'"
+
+# ###  GIT   ###
+# git: bring existing branch up to date
+alias git_fetch='git pull; cindex `git rev-parse --show-toplevel`'
+# get lastest changes; rebase (replay) current branch commits on top of master
+alias git_sync='git fetch origin && git rebase origin/master'
+# to see commits that have yet to be psuhed to origin/master
+alias git_commits='git diff --stat origin/master'
+# to see the reflog in a single line format, a more compact version of 'git show --name-only'
+alias git_reflog='git reflog;' 
+# to throw away any local commits and pull from origin/master
+alias git_reset='git reset --hard origin/master; git pull origin master'
+# to abort a merge (maybe do a rebase instead)
+alias git_merge='git merge --abort'
+# new feature branch 
+# git feature feature_name
+# git: revert (reset) a single uncommitted file? Do a git checkout on the filename :)
+alias git_revert_single_file='git checkout' #filename
+
+# git: to create a new branch
+# git config --global alias.feature "checkout --track origin/master -b"
+# git feature my-bug-fix
+
+function parse_git_branch {
+  ref=$(git symbolic-ref HEAD 2> /dev/null) || return
+  echo " ("${ref#refs/heads/}") "
+}
+
+
+# PYTHON environment
+source /usr/local/bin/virtualenvwrapper.sh
+alias pylint="pylint -E"
+# python mjson tool prints pretty JSON
+alias pj="python -mjson.tool"
+# Setting PATH for Python 2.7, for multiple versions of python better to use a virtualenv 
+export PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
+export PYTHONPATH="/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python"
+
+
+
+
+function func_ip(){
+    curl -s https://icanhazip.com
+}
+function print_in_color() {
+    printf "\e[94mcalled print_in_color!\e[0m \n"   
+} 
+
+
+alias icanhasip='curl -s https://icanhazip.com'
+
+# Ruby environment
+export PATH="$HOME/.rbenv/bin:$PATH" # Add ruby virtual env to PATH
+eval "$(rbenv init -)"
+# ruby_lint -- a yml linter using ruby; 
+# watch -n5 ruby_lint 
+
+# JAVA environment
+# export JAVA_HOME= 
+# mvn clean package -DskipTests
